@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
+from tkinter import colorchooser
+from tkinter import ttk
+from tkinter import font
 from reportlab.pdfgen import canvas
 import winsound
 
@@ -27,7 +30,15 @@ class Notepad:
         self.file_menu.add_separator()
         self.file_menu.add_command(label="Exit", command=self.master.quit)
 
+        self.settings_menu = tk.Menu(self.menu, tearoff=0)
+        self.menu.add_cascade(label="Settings", menu=self.settings_menu)
+        self.settings_menu.add_command(label="Change Background", command=self.change_background)
+        self.settings_menu.add_command(label="Toggle Typing Sound", command=self.toggle_typing_sound)
+        self.settings_menu.add_command(label="Change Font", command=self.change_font)
+        self.settings_menu.add_command(label="Set Background Image", command=self.set_background_image)
+
         self.filename = None
+        self.typing_sound_enabled = True
 
     def new_file(self):
         self.text.delete("1.0", tk.END)
@@ -73,7 +84,58 @@ class Notepad:
             c.save()
 
     def play_typing_sound(self, event):
-        winsound.PlaySound("keyboard.wav", winsound.SND_ASYNC)
+        if self.typing_sound_enabled:
+            winsound.PlaySound("keyboard.wav", winsound.SND_ASYNC)
+
+    def change_background(self):
+        color = colorchooser.askcolor(title="Choose Background Color")
+        if color[1]:
+            self.text.configure(bg=color[1])
+
+    def toggle_typing_sound(self):
+        self.typing_sound_enabled = not self.typing_sound_enabled
+
+    def change_font(self):
+        font = tk.font.Font(family="Arial", size=12)
+        font_tuple = tk.font.families()
+        selected_font = tk.font.Font(family=font.cget("family"), size=font.cget("size"))
+        font_dialog = tk.Toplevel(self.master)
+        font_dialog.title("Choose Font")
+        font_dialog.geometry("400x300")
+        font_dialog.configure(bg="#2b2b2b")
+
+        font_family_label = tk.Label(font_dialog, text="Font Family:", bg="#2b2b2b", fg="white")
+        font_family_label.pack()
+
+        font_family_combobox = ttk.Combobox(font_dialog, values=font_tuple, font=selected_font)
+        font_family_combobox.pack()
+
+        font_size_label = tk.Label(font_dialog, text="Font Size:", bg="#2b2b2b", fg="white")
+        font_size_label.pack()
+
+        font_size_entry = tk.Entry(font_dialog, font=selected_font)
+        font_size_entry.pack()
+
+        def apply_font():
+            selected_family = font_family_combobox.get()
+            selected_size = font_size_entry.get()
+            if selected_family and selected_size:
+                self.text.configure(font=(selected_family, int(selected_size)))
+            font_dialog.destroy()
+
+        apply_button = tk.Button(font_dialog, text="Apply", command=apply_font)
+        apply_button.pack()
+
+    def set_background_image(self):
+        image_filetypes = (("Image files", "*.jpg;*.jpeg;*.png;*.gif"), ("All files", "*.*"))
+        image_filename = filedialog.askopenfilename(title="Choose Background Image", filetypes=image_filetypes)
+        if image_filename:
+            try:
+                image = tk.PhotoImage(file=image_filename)
+                self.text.image_create(tk.END, image=image)
+                self.text.configure(bg="white")
+            except tk.TclError:
+                messagebox.showerror("Error", "Invalid image file.")
 
 if __name__ == "__main__":
     root = tk.Tk()
