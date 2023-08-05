@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import filedialog
 from tkinter import messagebox
 from reportlab.pdfgen import canvas
+import winsound
 
-
-# Define the Notepad along with its functionalities
 class Notepad:
     def __init__(self, master):
         self.master = master
@@ -14,6 +13,7 @@ class Notepad:
 
         self.text = tk.Text(self.master, bg="#1e1e1e", fg="white", insertbackground="white", font=("Arial", 12))
         self.text.pack(expand=True, fill="both")
+        self.text.bind("<Key>", self.play_typing_sound)
 
         self.menu = tk.Menu(self.master)
         self.master.config(menu=self.menu)
@@ -71,6 +71,9 @@ class Notepad:
             c.drawString(50, 750, self.filename)
             c.drawString(50, 700, "\n".join(text_lines))
             c.save()
+
+    def play_typing_sound(self, event):
+        winsound.PlaySound("keyboard.wav", winsound.SND_ASYNC)
 
 if __name__ == "__main__":
     root = tk.Tk()
