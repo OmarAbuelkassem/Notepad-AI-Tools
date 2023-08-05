@@ -137,6 +137,7 @@ class Notepad:
             except tk.TclError:
                 messagebox.showerror("Error", "Invalid image file.")
 
+
 if __name__ == "__main__":
     root = tk.Tk()
     notepad = Notepad(root)
